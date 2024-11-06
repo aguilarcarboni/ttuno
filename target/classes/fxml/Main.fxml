@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.layout.FlowPane?>
+
+<VBox xmlns="http://javafx.com/javafx/8.0.171"
+      xmlns:fx="http://javafx.com/fxml/1"
+      stylesheets="@../css/uno-dark.css"
+      alignment="CENTER"
+      spacing="20"
+      prefHeight="625.0" prefWidth="1000.0">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <VBox fx:id="mainContent" alignment="CENTER" spacing="20">
+
+        <VBox alignment="CENTER" spacing="20">
+        <Label fx:id="titleLabel" 
+               style="-fx-font-size: 32px; -fx-font-weight: bold;"
+               text="Welcome to TTUno."/>
+
+        <Label fx:id="waitingForPlayersLabel"
+            style="-fx-font-size: 14px;"
+                text="Waiting for players..."/>
+        </VBox>
+  
+        <VBox alignment="CENTER" spacing="20">
+            <JFXButton fx:id="startGameButton" 
+                text="Start game!"/>
+        </VBox>
+
+        <FlowPane fx:id="playersContainer" 
+                  alignment="CENTER" 
+                  hgap="20" 
+                  vgap="10"/>
+    </VBox>
+</VBox> 

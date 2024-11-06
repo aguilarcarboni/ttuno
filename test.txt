@@ -1,0 +1,3 @@
+mvn archetype:generate -DgroupId=leomessi.uno -DartifactId=uno -DarchetypeArtifactId=maven-archetype-quickstart -DarchetypeVersion=1.5 -DinteractiveMode=false 
+mvn package
+java -cp target/uno-1.0-SNAPSHOT.jar leomessi.uno.App

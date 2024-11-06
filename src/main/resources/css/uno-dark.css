@@ -1,0 +1,51 @@
+.root {
+    -fx-background-color: #FDFDFD;
+    background-color: #FDFDFD;
+    -fx-font-family: "Open Sans";
+    font-family: "Open Sans";
+}
+
+.label {
+    -fx-text-fill: #0a0a0a;
+    -fx-font-family: "Open Sans";
+    font-family: "Open Sans";
+}
+
+.jfx-button {
+    -fx-font-size: 20px;
+    font-size: 20px;
+    -fx-background-color: #51ad70;
+    background-color: #51ad70;
+    -fx-text-fill: #FDFDFD;
+    -fx-font-family: "Open Sans";
+    font-family: "Open Sans";
+}
+
+.card-button {
+    -fx-text-fill: #0a0a0a;
+    -fx-padding: 10px;
+    padding: 10px;
+    -fx-min-width: 80px;
+    min-width: 80px;
+    -fx-min-height: 120px;
+    min-height: 120px;
+    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 0);
+    -fx-font-family: "Open Sans";
+    font-family: "Open Sans";
+}
+
+.card-button:hover {
+    -fx-cursor: hand;
+    cursor: hand;
+}
+
+#unoButton {
+    -fx-background-color: rgb(83, 24, 18);
+    background-color: rgb(83, 24, 18);
+}
+
+#unoButton:hover {
+    background-color: #dd5151;
+    -fx-background-color: #dd5151;
+}
