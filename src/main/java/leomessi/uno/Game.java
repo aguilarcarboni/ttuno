@@ -153,36 +153,38 @@ public class Game {
     }
 
     public String chooseColor() {
-        // For testing purposes
-        if (testColor != null) {
-            String color = testColor;
-            testColor = null;
-            return color;
-        }
-        
         // If there's a pending color choice, use it
         if (pendingColor != null) {
             String color = pendingColor;
             pendingColor = null;
+            logger.info("GAME: Using pending color: " + color);
             return color;
         }
         
-        // Return a default color if no choice is available
-        // Log this as a warning instead of an error since we're providing a fallback
-        logger.warning("No color choice available for wild card - defaulting to Red");
-        return "Red";
+        // For testing purposes
+        if (testColor != null) {
+            String color = testColor;
+            testColor = null;
+            logger.info("GAME: Using test color: " + color);
+            return color;
+        }
+        
+        // Default to RED if no color is specified
+        logger.info("GAME: No color choice available - defaulting to RED");
+        return "RED";
     }
 
     public void setPendingColor(String color) {
-        // Store the color in uppercase to match the card implementation
-        if (color != null) {
-            this.pendingColor = color.toUpperCase();
-        }
+        logger.info("GAME: Setting pending color: " + color);
+        this.pendingColor = color.toUpperCase();
+        logger.info("GAME: Pending color set to: " + this.pendingColor);
     }
 
     public void setCurrentColor(String color) { 
-        // Keep the color in the same format as it comes from the card
-        topCard = new ColorCard(new BasicCard(color.toUpperCase(), "Number")); 
+        color = color.toUpperCase();
+        logger.info("GAME: Setting current color to: " + color);
+        topCard = new ColorCard(new BasicCard(color, "Number")); 
+        logger.info("GAME: New top card after color change: " + topCard.toString());
         lobby.setGameState("The color has been changed to " + color); 
     }
 
@@ -204,15 +206,29 @@ public class Game {
     }
 
     public boolean isValidPlay(Card card) {
-        // Wild cards can always be played
-        System.out.println("Card color: " + card.getColor());
-        if (card.getColor().equals("Black")) {
+        // Log the validation attempt
+        logger.info("Validating card play: " + card.toString() + " against top card: " + topCard.toString());
+        
+        // Wild cards can always be played - check this first!
+        if (card.getColor().equalsIgnoreCase("BLACK")) {
+            logger.info("Wild card played - valid play");
             return true;
         }
         
-        // Check if the card matches either the color or the type of the top card
-        return card.getColor().equals(topCard.getColor()) || 
-               card.getType().equals(topCard.getType());
+        // Get the actual color of the top card (handle both regular cards and color cards)
+        String topCardColor = topCard.toString().startsWith("Color:") ? 
+            topCard.toString().substring(7).trim() : // Handle "Color: RED" format
+            topCard.getColor();                      // Handle regular cards
+        
+        // Check if either the color or the value matches
+        boolean colorMatch = card.getColor().equalsIgnoreCase(topCardColor);
+        boolean valueMatch = card.getType().equals(topCard.getType());
+        
+        logger.info("Top card color: " + topCardColor);
+        logger.info("Played card color: " + card.getColor());
+        logger.info("Color match: " + colorMatch + ", Value match: " + valueMatch);
+        
+        return colorMatch || valueMatch;
     }
 
     public void callUno(String playerName) {

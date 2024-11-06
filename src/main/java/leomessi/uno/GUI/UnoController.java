@@ -115,8 +115,13 @@ public class UnoController {
                 updateControlsForTurn(isPlayerTurn);
             }
             else if (msg.startsWith("TOP_CARD:")) {
-                String card = msg.substring("TOP_CARD:".length());
-                updateTopCardDisplay(card);
+                String cardInfo = msg.substring("TOP_CARD:".length());
+                // Handle color-only cards (after wild card plays)
+                if (cardInfo.startsWith("Color:")) {
+                    updateTopCardDisplay(cardInfo);
+                } else {
+                    updateTopCardDisplay(cardInfo);
+                }
             }
             else if (msg.startsWith("PLAYER_DATA")) {
                 handlePlayerData(messages);
@@ -194,6 +199,9 @@ public class UnoController {
         cardContainer.getChildren().clear();
         VBox cardBox = createCardBox(card, false);
         cardContainer.getChildren().add(cardBox);
+        
+        // Log the card update for debugging
+        logger.info("Updating top card display: " + card);
     }
 
     private void clearDisplay() {
@@ -210,18 +218,24 @@ public class UnoController {
 
         // Parse card text to determine color and value
         String[] cardParts = cardText.trim().split("_");
-        String color = cardParts[0].toLowerCase();
-        String value = cardText;  // Keep the full text for value initially
+        String color;
+        String value;
 
         // Special handling for color-only cards (after wild card plays)
         if (cardText.startsWith("Color:")) {
-            color = cardText.trim().split(":")[1].toLowerCase().trim(); // Skip "color:" prefix
-            value = "0"; // Use 0 as default value for color-only cards
-        } else if (cardParts.length >= 2) {
-            value = cardParts[1].toLowerCase();
+            color = cardText.substring(cardText.indexOf(":") + 1).trim().toLowerCase();
+            value = "0"; // Default value for color cards
+        } else if (cardText.contains("WILD") || cardText.contains("Wild")) {
+            color = "black";
+            value = cardText.toLowerCase();
+        } else {
+            // Regular cards
+            color = cardParts[0].toLowerCase();
+            value = cardParts.length > 1 ? cardParts[1].toLowerCase() : cardText.toLowerCase();
         }
 
-        System.out.println("Card text: " + cardText + " | Color: " + color + " | Value: " + value);
+        // Debug logging
+        logger.info("Creating card box - Text: " + cardText + " | Color: " + color + " | Value: " + value);
 
         String imagePath = getCardImagePath(color, value);
         String fullPath = "/cards/" + imagePath;
@@ -249,29 +263,28 @@ public class UnoController {
             cardBox.getChildren().add(imageView);
             
         } catch (Exception e) {
-            logger.error("Error loading card image: " + fullPath);
-            e.printStackTrace();
+            logger.error("Error loading card image: " + fullPath + " - " + e.getMessage());
             
-            // Fallback to a colored rectangle with text
             VBox fallbackBox = new VBox(5);
             fallbackBox.setAlignment(Pos.CENTER);
             fallbackBox.setPrefWidth(90);
             fallbackBox.setPrefHeight(140);
             
-            // Set background color based on card color
             String style = "-fx-background-color: ";
             switch (color.toUpperCase()) {
                 case "RED": style += "#ff6b6b;"; break;
                 case "BLUE": style += "#4dabf7;"; break;
                 case "GREEN": style += "#69db7c;"; break;
                 case "YELLOW": style += "#ffd43b;"; break;
+                case "BLACK": style += "#000000;"; break;
                 default: style += "#ffffff;"; break;
             }
             style += "-fx-border-color: black; -fx-border-width: 2; -fx-border-radius: 10; -fx-background-radius: 10;";
             fallbackBox.setStyle(style);
             
             Label valueLabel = new Label(value);
-            valueLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+            valueLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: " + 
+                (color.equals("yellow") ? "black" : "white") + ";");
             fallbackBox.getChildren().add(valueLabel);
             
             cardBox.getChildren().add(fallbackBox);
@@ -300,20 +313,16 @@ public class UnoController {
         color = color.toLowerCase();
         value = value.toLowerCase();
         
-        // Handle the special case where value is "color: {color}"
-        if (value.startsWith("color:")) {
-            // For a color-only card (after wild card color selection),
-            // show a basic card of that color
-            System.out.println("Returning color-only card: " + color + "_0.png");
-            return color + "_0.png";
+        // Handle wild cards
+        if (value.contains("wild")) {
+            if (value.contains("draw 4")) {
+                return "wild_draw4.png";
+            }
+            return "wild.png";
         }
         
         // Handle special cards
         switch (value) {
-            case "wild":
-                return "wild.png";
-            case "wild draw 4":
-                return "wild_draw4.png";
             case "skip":
                 return color + "_skip.png";
             case "reverse":
@@ -352,7 +361,14 @@ public class UnoController {
             if (!isShowingColorDialog) {
                 isShowingColorDialog = true;
                 showColorSelectionDialog(chosenColor -> {
-                    client.sendMessage("play_card:" + card + ":" + chosenColor);
+                    // Send the card play with the chosen color
+                    String playMessage = "play_card:" + card + ":" + chosenColor;
+                    logger.info("GUI: Playing wild card with color selection: " + playMessage);
+                    client.sendMessage(playMessage);
+                    
+                    // Hide the color picker after selection
+                    colorPickerContainer.setVisible(false);
+                    isShowingColorDialog = false;
                 });
             }
         } else {
@@ -363,47 +379,61 @@ public class UnoController {
 
     private void showColorSelectionDialog(Consumer<String> colorCallback) {
         Platform.runLater(() -> {
+            logger.info("GUI: Opening color selection dialog");
             // Clear existing content
             colorPickerContainer.getChildren().clear();
             
+            // Create color buttons with their handlers
+            JFXButton redButton = createColorButton("Red", "#ff0000");
+            redButton.setOnAction(e -> {
+                logger.info("GUI: Selected color RED");
+                colorCallback.accept("RED");
+            });
+            
+            JFXButton blueButton = createColorButton("Blue", "#0000ff");
+            blueButton.setOnAction(e -> {
+                logger.info("GUI: Selected color BLUE");
+                colorCallback.accept("BLUE");
+            });
+            
+            JFXButton greenButton = createColorButton("Green", "#00ff00");
+            greenButton.setOnAction(e -> {
+                logger.info("GUI: Selected color GREEN");
+                colorCallback.accept("GREEN");
+            });
+            
+            JFXButton yellowButton = createColorButton("Yellow", "#ffff00");
+            yellowButton.setOnAction(e -> {
+                logger.info("GUI: Selected color YELLOW");
+                colorCallback.accept("YELLOW");
+            });
+            
             // Create new components
             Label prompt = new Label("Choose a color:");
-            prompt.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+            prompt.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: black;");
             
             HBox buttonBox = new HBox(10);
             buttonBox.setAlignment(Pos.CENTER);
             
-            // Create color buttons with their handlers
-            JFXButton redButton = createColorButton("Red", "#ff6b6b");
-            redButton.setOnAction(e -> {
-                colorPickerContainer.setVisible(false);
-                isShowingColorDialog = false;
-                colorCallback.accept("RED");
-            });
-            
-            JFXButton blueButton = createColorButton("Blue", "#4dabf7");
-            blueButton.setOnAction(e -> {
-                colorPickerContainer.setVisible(false);
-                isShowingColorDialog = false;
-                colorCallback.accept("BLUE");
-            });
-            
-            JFXButton greenButton = createColorButton("Green", "#69db7c");
-            greenButton.setOnAction(e -> {
-                colorPickerContainer.setVisible(false);
-                isShowingColorDialog = false;
-                colorCallback.accept("GREEN");
-            });
-            
-            JFXButton yellowButton = createColorButton("Yellow", "#ffd43b");
-            yellowButton.setOnAction(e -> {
-                colorPickerContainer.setVisible(false);
-                isShowingColorDialog = false;
-                colorCallback.accept("YELLOW");
-            });
-            
             buttonBox.getChildren().addAll(redButton, blueButton, greenButton, yellowButton);
-            colorPickerContainer.getChildren().addAll(prompt, buttonBox);
+            
+            // Add a semi-transparent background panel
+            VBox dialogPanel = new VBox(10);
+            dialogPanel.setStyle(
+                "-fx-background-color: rgba(255, 255, 255, 0.9);" +
+                "-fx-padding: 20px;" +
+                "-fx-border-radius: 10px;" +
+                "-fx-background-radius: 10px;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 10, 0, 0, 0);"
+            );
+            dialogPanel.setAlignment(Pos.CENTER);
+            dialogPanel.getChildren().addAll(prompt, buttonBox);
+            
+            colorPickerContainer.getChildren().add(dialogPanel);
+            colorPickerContainer.setStyle(
+                "-fx-background-color: rgba(0,0,0,0.5);" +
+                "-fx-padding: 20px;"
+            );
             
             // Show the color picker
             colorPickerContainer.setVisible(true);
@@ -414,11 +444,28 @@ public class UnoController {
         JFXButton button = new JFXButton(color);
         button.setStyle(
             "-fx-background-color: " + hexColor + ";" +
-            "-fx-text-fill: white;" +
+            "-fx-text-fill: " + (color.equals("Yellow") ? "black" : "white") + ";" +
             "-fx-font-size: 14px;" +
+            "-fx-font-weight: bold;" +
             "-fx-padding: 10px 20px;" +
-            "-fx-background-radius: 5px;"
+            "-fx-background-radius: 5px;" +
+            "-fx-cursor: hand;"
         );
+        
+        // Add hover effect
+        button.setOnMouseEntered(e -> 
+            button.setStyle(button.getStyle() + 
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 10, 0, 0, 0);"
+            )
+        );
+        
+        button.setOnMouseExited(e -> 
+            button.setStyle(button.getStyle().replace(
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 10, 0, 0, 0);", 
+                ""
+            ))
+        );
+        
         return button;
     }
 

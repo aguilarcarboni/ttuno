@@ -1,7 +1,7 @@
 package leomessi.uno.Cards;
 import leomessi.uno.Game;
 
-public class WildDraw_4_Card extends CardDecorator{ //Draw 4 Card decorator
+public class WildDraw_4_Card extends CardDecorator { //Draw 4 Card decorator
     public WildDraw_4_Card(Card decoratedCard){ //Constructor
         super(decoratedCard);
     }

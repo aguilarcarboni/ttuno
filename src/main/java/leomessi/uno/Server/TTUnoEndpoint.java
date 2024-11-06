@@ -202,10 +202,24 @@ public class TTUnoEndpoint {
         // Parse card and color if it's a wild card
         String[] cardParts = cardString.split(":");
         String cardValue = cardParts[0];
-        String chosenColor = cardParts.length > 1 ? cardParts[1] : null;
+        String chosenColor = null;
         
-        // If it's a wild card, set the pending color
-        if (cardValue.toLowerCase().contains("wild") && chosenColor != null) {
+        // Make sure we have enough parts and the last part is a valid color
+        if (cardParts.length > 1) {
+            chosenColor = cardParts[cardParts.length - 1];  // Take the last part as color
+            logger.info("ENDPOINT: Parsed color choice from message: " + chosenColor);
+        }
+        
+        logger.info("ENDPOINT: Received play card request - Card: " + cardValue + 
+                    (chosenColor != null ? ", Color choice: " + chosenColor : ""));
+        
+        // If it's a wild card, validate and set the color
+        if (cardValue.toLowerCase().contains("wild")) {
+            if (chosenColor == null || !game.isValidColor(chosenColor)) {
+                logger.warning("ENDPOINT: Invalid or missing color for wild card: " + chosenColor);
+                chosenColor = "RED";
+            }
+            logger.info("ENDPOINT: Setting pending color for wild card: " + chosenColor);
             game.setPendingColor(chosenColor);
         }
         
