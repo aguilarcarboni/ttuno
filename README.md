@@ -23,6 +23,18 @@ The project also incorporates several design patterns to enhance its architectur
 - **Observer Pattern**: Implemented to notify players of game state changes, such as when a player takes a turn or when the game ends.
 - **Factory Pattern**: Utilized for creating different types of cards dynamically, allowing for easy expansion of card types in the future.
 
+### Running and compiling
+Run the local server on one machine:
+```
+./server.sh
+```
+
+Run the client(s):
+```
+./frontend.sh
+```
+
+
 ### Results 
 Scored a 100% in the project.
 
