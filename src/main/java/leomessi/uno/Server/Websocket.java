@@ -23,7 +23,12 @@ public class Websocket {
     }
 
     public static String getIpAddress() {
-        return "172.17.10.27";
+        try {
+            return java.net.InetAddress.getLocalHost().getHostAddress();
+        } catch (java.net.UnknownHostException e) {
+            logger.announcement("Failed to get IP address, falling back to localhost", "error");
+            return "localhost";
+        }
     }
 
     public static void startWebSocketServer() {
