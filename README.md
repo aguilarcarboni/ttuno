@@ -24,5 +24,6 @@ The project also incorporates several design patterns to enhance its architectur
 - **Factory Pattern**: Utilized for creating different types of cards dynamically, allowing for easy expansion of card types in the future.
 
 ### Results 
+Scored a 100% in the project.
 
 ### created by [@aguilarcarboni](https://github.com/aguilarcarboni/), [EMurillo7](https://github.com/EMurillo7) and [@leomessi](https://github.com/leomessi)
