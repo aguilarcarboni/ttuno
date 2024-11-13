@@ -1,12 +1,8 @@
 # UNO Game Project
 
 ## Object Oriented Programming
-A local multiplayer UNO game built with a server-side architecture and MVC design pattern, emphasizing Object-Oriented Programming principles.
-
 ### Description 
-This project is a digital version of the classic card game UNO, designed for multiplayer gameplay over the internet. The game allows players to join a lobby, play against each other in real-time, and experience the fun of UNO from the comfort of their own homes. 
-
-The architecture of the game is based on the Model-View-Controller (MVC) pattern, which separates the game logic, user interface, and user input handling. This separation of concerns makes the codebase more manageable, scalable, and easier to maintain.
+A local multiplayer UNO game built with a server-side architecture and MVC design pattern, emphasizing Object-Oriented Programming principles. The architecture of the game is based on the Model-View-Controller (MVC) pattern, which separates the game logic, user interface, and user input handling. This separation of concerns makes the codebase more manageable, scalable, and easier to maintain.
 
 ### OOP Principles
 The project utilizes key Object-Oriented Programming principles, including:
