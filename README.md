@@ -17,6 +17,6 @@ Run the client(s):
 
 
 ### Results 
-Scored a 100% in the project.
+- Scored a 100% in the project.
 
 ### created by [@aguilarcarboni](https://github.com/aguilarcarboni/), [Esteban11632](https://github.com/Esteban11632) and [@leomessi](https://github.com/leomessi)
